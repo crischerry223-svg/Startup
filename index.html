@@ -56,8 +56,16 @@ button,input,select,textarea{font:inherit;color:inherit}
 .brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;cursor:pointer;flex:none}
 .brand-mark{width:30px;height:30px}
 .brand-name{font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:-.01em}
-.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
-.nav::-webkit-scrollbar{display:none}
+.nav-wrap{position:relative;flex:1;min-width:0;display:flex;align-items:center}
+.nav{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--edge) transparent;padding-bottom:3px;margin-bottom:-3px}
+.nav::-webkit-scrollbar{height:4px}.nav::-webkit-scrollbar-thumb{background:var(--edge);border-radius:2px}.nav::-webkit-scrollbar-track{background:transparent}
+.nav-wrap.fl .nav{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 44px);mask-image:linear-gradient(90deg,transparent 0,#000 44px)}
+.nav-wrap.fr .nav{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent 100%);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent 100%)}
+.nav-wrap.fl.fr .nav{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 44px,#000 calc(100% - 44px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 44px,#000 calc(100% - 44px),transparent 100%)}
+.nav-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);padding:0}
+.nav-arrow svg{width:14px;height:14px}
+.nav-arrow:hover{border-color:var(--edge);background:var(--surface-2)}
+.nav-arrow.left{left:0}.nav-arrow.right{right:0}
 .nav button{display:flex;align-items:center;gap:8px;white-space:nowrap;background:none;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500}
 .nav button:hover{background:var(--surface-2);color:var(--fg)}
 .nav button.active{background:var(--accent-soft);color:var(--accent)}
@@ -486,6 +494,23 @@ tr.row-err td{background:var(--hi-soft)}
 .jl{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
 .jl:first-child{border-top:0}
 @media (max-width:640px){.jl{grid-template-columns:1fr}}
+
+.sc{border:1.5px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.sc.bad{border-color:var(--hi);background:var(--hi-soft)}.sc.warn{border-color:var(--mid)}.sc.ok{border-color:var(--lo)}
+.sc-h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;font-size:14px}
+.sc.bad .sc-h span{color:var(--hi);font-weight:500}.sc.ok .sc-h span{color:var(--lo)}.sc.warn .sc-h span{color:var(--mid)}
+.sc-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.sc-l li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:8px;align-items:start}
+.sc-l li span:not(.sc-i){display:block;color:var(--fg-soft);font-size:12.5px}
+.sc-i{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;margin-top:1px}
+.sc-i.err{background:var(--hi)}.sc-i.warn{background:var(--mid)}.sc-i.ok{background:var(--lo)}
+.sc-ok summary{cursor:pointer;font-size:13px;color:var(--muted)}.sc-ok .sc-l{margin-top:8px}
+.req-panel summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.req-panel summary::-webkit-details-marker{display:none}
+.req-panel summary>span{display:flex;flex-direction:column;gap:2px}.req-panel summary .muted{font-size:13px}
+.req-panel summary::after{content:"▾";color:var(--muted);font-size:14px}.req-panel[open] summary::after{content:"▴"}
+.req-body{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.req-tbl td{vertical-align:top}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -496,6 +521,8 @@ tr.row-err td{background:var(--hi-soft)}
       <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--accent)"/><circle cx="9" cy="10" r="3.2" fill="var(--accent-ink)"/><circle cx="23" cy="9" r="3.2" fill="var(--accent-ink)"/><circle cx="16" cy="23" r="3.6" fill="var(--accent-ink)"/><path d="M9 10 23 9M9 10 16 23M23 9 16 23" stroke="var(--accent-ink)" stroke-width="1.6" fill="none"/></svg>
       <span class="brand-name">Граф прав</span>
     </button>
+    <div class="nav-wrap" id="navWrap">
+    <button class="nav-arrow left" id="navLeft" type="button" aria-label="Прокрутить меню влево" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3 5 8l5 5"/></svg></button>
     <nav class="nav" id="nav">
       <button data-go="home">Главная</button>
       <button data-go="load"><span class="step"><span>1</span></span>Данные</button>
@@ -505,6 +532,8 @@ tr.row-err td{background:var(--hi-soft)}
       <button data-go="analysts">Аналитики</button>
       <button data-go="report">Отчёт</button>
     </nav>
+    <button class="nav-arrow right" id="navRight" type="button" aria-label="Прокрутить меню вправо" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 3 5 5-5 5"/></svg></button>
+    </div>
     <div class="graph-pill" id="graphPill"><span class="dot"></span><span id="graphPillText">Граф не построен</span></div>
   </div>
 </header>
@@ -637,7 +666,7 @@ tr.row-err td{background:var(--hi-soft)}
         <li>Разделитель — запятая, точка с запятой или табуляция: определяется автоматически. Текст с разделителем внутри заключается в двойные кавычки.</li>
         <li>Кодировка UTF-8 или Windows-1251. Подходит обычное сохранение из Excel: «CSV UTF-8» или «CSV (разделители — точки с запятой)».</li>
         <li>Даты в виде <span class="mono">2026-10-21</span> или <span class="mono">21.10.2026</span>. Дробные числа через точку или запятую. Логические значения: true/false, 1/0 или да/нет.</li>
-        <li>Обязательные таблицы: users, videos, works, rightholders, content_matches. Ссылки между таблицами (uploader_id, work_id и другие) должны совпадать с ID в связанных файлах.</li>
+        <li>Обязательные таблицы: users, videos, works, rightholders, content_matches. Ссылки между таблицами (uploader_id, work_id и другие) должны совпадать с ID в связанных файлах. Файлы и столбцы с другими названиями (например, <span class="mono">clips.csv</span> с <span class="mono">author_id</span>) распознаются автоматически — полный список в блоке «Требования к структуре данных».</li>
       </ul>
       <h3>Примеры файлов</h3>
       <div class="seg" id="exTabs"></div>
@@ -662,6 +691,15 @@ tr.row-err td{background:var(--hi-soft)}
     <div class="term" id="pgLog" style="margin-top:14px" hidden></div>
     <div class="note" style="margin-top:12px"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6v.5"/></svg><span>Браузерная версия не может открыть сетевое соединение с СУБД, поэтому шаги подключения проигрываются, а загружается тестовая схема videohub. В серверной версии модуль читает таблицы через драйвер psycopg и отслеживает изменения через логическую репликацию.</span></div>
   </div>
+
+  <details class="panel req-panel" id="reqPanel">
+    <summary><span><b>Требования к структуре данных</b><span class="muted">Какие таблицы и поля нужны, как они могут называться, какие ключи обязательны</span></span></summary>
+    <div class="req-body">
+      <p style="max-width:90ch;color:var(--fg-soft);font-size:14px">У каждой платформы свои названия таблиц и столбцов, единого стандарта нет. Модуль сам распознаёт таблицы по названию и столбцам, включая распространённые другие названия из таблицы ниже. Если что-то распознано неверно, поменяйте вручную: таблицу файла — при загрузке, таблицу-источник и главный ключ объекта — в схеме преобразования. Перед построением графа модуль проверяет структуру: обязательные поля, уникальность ключей и совпадение ссылок между таблицами. Если ссылки не совпадают совсем, построение блокируется.</p>
+      <div id="reqBody"></div>
+      <div class="row"><button class="btn sm" id="reqSave" type="button">Скачать требования (.md)</button><span class="muted" style="font-size:12.5px">Наведите на поле, чтобы увидеть его другие названия</span></div>
+    </div>
+  </details>
 
   <div id="mapping" hidden class="view" style="gap:16px">
     <div class="panel" id="filesPanel">
@@ -691,7 +729,7 @@ tr.row-err td{background:var(--hi-soft)}
       <div class="note" id="mapWarn" style="margin-top:14px" hidden></div>
       <div class="row" style="margin-top:18px;justify-content:space-between">
         <div class="row"><span class="muted" style="font-size:13.5px">Необязательные таблицы можно отключить, обязательные — нет.</span><button class="btn sm ghost" id="mapReset">Вернуть связки по умолчанию</button></div>
-        <button class="btn primary" id="buildBtn">Подтвердить и построить граф</button>
+        <div class="row"><button class="btn ghost sm" id="buildHint" type="button" title="Показать проверку структуры"></button><button class="btn primary" id="buildBtn">Подтвердить и построить граф</button></div>
       </div>
     </div>
     <div class="panel" id="buildPanel" hidden>
@@ -992,16 +1030,83 @@ function objRows(t){const m=state.map&&state.map[t];if(!m||!m.source||!state.tab
 function hasField(t,f){const m=state.map[t];if(!m.source)return false;return m.colmap?!!m.colmap[f]:rawCols(m.source).includes(f)}
 function colsOf(t){const set=new Set(SCHEMA[t]?SCHEMA[t].cols:[]);objRows(t).slice(0,60).forEach(r=>Object.keys(r).forEach(k=>set.add(k)));return [...set]}
 const labelTaken=(t,val)=>ORDER.find(x=>x!==t&&state.map[x].role==='vertex'&&state.map[x].on&&String(state.map[x].neo||'').toLowerCase()===String(val).toLowerCase());
-function mapErrors(){const M=state.map;const E=[],W=[];if(!M)return {E,W};
-  ORDER.forEach(t=>{const m=M[t];const req=LOCK.tables.includes(t);
-    if(req&&!m.source){E.push(`Объекту «${m.title}» не выбрана таблица-источник. Для обязательного объекта её нужно выбрать.`);return}
-    if(!m.on||!m.source)return;
+// Other names the module recognises automatically: real platforms name their tables and columns differently
+const TABLE_SYN={users:['user','accounts','account','channels','channel','members','authors','uploaders','пользователи'],videos:['video','clips','clip','media','media_items','uploads','content','ролики','видео'],
+  works:['work','assets','protected_works','catalog','reference_files','references','произведения'],rightholders:['rightholder','rights_holders','right_holders','owners','content_owners','copyright_owners','labels','правообладатели'],
+  licenses:['license','licences','licence','agreements','contracts','лицензии'],complaints:['complaint','claims','claim','takedowns','takedown_requests','dmca','strikes','жалобы'],
+  content_matches:['matches','content_id_matches','fingerprint_matches','detections','совпадения'],blocks:['block','bans','suspensions','sanctions','блокировки'],account_links:['linked_accounts','user_links','associations','связи_аккаунтов']};
+const COL_SYN={user_id:['uid','account_id','channel_id'],username:['login','nickname','handle','channel_name','user_name','name'],registered_at:['created_at','signup_date','registration_date','joined_at'],country:['country_code','region'],
+  subscribers:['followers','subscriber_count','subs'],status:['state','account_status'],video_id:['clip_id','media_id'],uploader_id:['author_id','owner_id','channel_id','account_id','user_id','author','uploaded_by'],
+  title:['name','video_title','caption'],duration_sec:['duration','length','length_sec','duration_seconds'],published_at:['upload_date','uploaded_at','publish_date','created_at'],views:['view_count','views_count','plays'],
+  monetized:['is_monetized','monetization','ads_enabled'],work_id:['asset_id','reference_id','title_id'],kind:['type','category','work_type'],year:['release_year'],
+  rightholder_id:['owner_id','rights_holder_id','right_holder_id','label_id','content_owner_id'],name:['title','company','owner_name','label'],licensor_id:['rightholder_id','owner_id','grantor_id'],
+  licensee_id:['user_id','account_id','grantee_id','channel_id'],valid_from:['start_date','date_from','begins_at'],valid_to:['end_date','date_to','expires_at'],territory:['territories','countries','region'],scope:['rights','usage'],
+  complaint_id:['claim_id','takedown_id','report_id'],filed_at:['claim_date','submitted_at','created_at','date'],match_id:['detection_id'],similarity:['score','match_score','confidence'],
+  matched_sec:['matched_duration','match_duration','overlap_sec'],method:['match_type','detection_method'],detected_at:['created_at','date'],block_id:['ban_id'],blocked_at:['banned_at','created_at','date'],
+  reason:['comment','description','cause'],user_a:['user_id_1','account_a','user1_id','first_user_id'],user_b:['user_id_2','account_b','user2_id','second_user_id'],link_type:['type','relation'],confidence:['score','probability']};
+const nameMatches=(stem,t)=>stem===t||(TABLE_SYN[t]||[]).includes(stem);
+function autoColmap(t,header){const m={};const used=new Set();const key=SCHEMA[t].key;
+  SCHEMA[t].cols.forEach(c=>{if(header.includes(c)){m[c]=c;used.add(c)}});
+  SCHEMA[t].cols.forEach(c=>{if(m[c])return;const alts=[...(c===key?['id']:[]),...(COL_SYN[c]||[])];const hit=alts.find(a=>header.includes(a)&&!used.has(a));m[c]=hit||'';if(hit)used.add(hit)});
+  return m}
+function guessTable(header,stem){let best=null,score=-99;
+  for(const t of ORDER){const cm=autoColmap(t,header);let sc=0;SCHEMA[t].cols.forEach(c=>{if(cm[c])sc+=cm[c]===c?2:1});
+    if(!cm[SCHEMA[t].key])sc-=3;if(nameMatches(stem,t))sc+=5;if(sc>score){score=sc;best=t}}
+  return score>=4?best:null}
+const synCount=f=>f.table?SCHEMA[f.table].cols.filter(c=>f.colmap[c]&&f.colmap[c]!==c).length:0;
+
+/* ---------- Structure check: run before building so the graph cannot break ---------- */
+const keySrcColOf=(t,f)=>{const m=state.map[t];return m.colmap?m.colmap[f]||'':f};
+function structureCheck(){const M=state.map;const C=[];if(!M||!state.tables)return C;
+  const add=(level,title,detail)=>C.push({level,title,detail:detail||''});const on=t=>M[t]&&M[t].on&&M[t].source;
+  ORDER.forEach(t=>{const m=M[t];if(LOCK.tables.includes(t)&&!m.source)add('err',`«${m.title}»: не выбрана таблица-источник`,'Обязательный объект должен получать данные из загруженной таблицы.')});
+  ORDER.forEach(t=>{const m=M[t];if(!on(t))return;const n=objRows(t).length;
+    if(LOCK.tables.includes(t)&&!n)add('err',`«${m.title}»: таблица ${m.source} пуста`,'Без строк этого объекта цепочки не построятся.');
     const miss=reqCols(t).filter(f=>!hasField(t,f));
-    if(miss.length)E.push(`«${m.title}» из таблицы ${m.source}: нет обязательных полей ${miss.join(', ')}. Сопоставьте их со столбцами таблицы в настройках объекта.`)});
-  const seen={};ORDER.forEach(t=>{const m=M[t];if(m.role!=='vertex'||!m.on)return;const k=String(m.neo).toLowerCase();if(seen[k])E.push(`Одинаковые названия вершин: «${m.neo}» у объектов «${seen[k]}» и «${m.title}». Названия вершин должны быть разными.`);else seen[k]=m.title});
-  const bySrc={};ORDER.forEach(t=>{const m=M[t];if(m.on&&m.source)(bySrc[m.source]=bySrc[m.source]||[]).push(m.title)});
-  Object.entries(bySrc).forEach(([src,ts])=>{if(ts.length>1)W.push(`Таблица ${src} используется для нескольких объектов: ${ts.join(', ')}.`)});
-  return {E,W}}
+    if(miss.length)add('err',`«${m.title}»: нет обязательных полей ${miss.join(', ')}`,`Сопоставьте их со столбцами таблицы ${m.source} в настройках объекта или добавьте в файл.`);
+    else add('ok',`«${m.title}»: все обязательные поля на месте`,`таблица ${m.source}, ${n} ${plural(n,'строка','строки','строк')}`)});
+  const seen={};ORDER.forEach(t=>{const m=M[t];if(m.role!=='vertex'||!on(t))return;const k=String(m.neo).toLowerCase();
+    if(seen[k])add('err',`Одинаковые названия вершин: «${m.neo}»`,`У объектов «${seen[k]}» и «${m.title}». Названия вершин должны быть разными.`);else seen[k]=m.title});
+  ORDER.forEach(t=>{const m=M[t];if(!on(t)||!hasField(t,m.key))return;const k=keyStats(t);const n=objRows(t).length;if(!n)return;
+    if(k.dup){const lvl=m.role==='vertex'&&k.dup/n>.2?'err':'warn';add(lvl,`«${m.title}»: ключ ${keySrcCol(t)} не уникален — ${k.dup} ${plural(k.dup,'повтор','повтора','повторов')} из ${n}`,lvl==='err'?'Похоже, выбран не тот ключ: строки объединятся в одну вершину. Выберите столбец с уникальными значениями.':'Строки с одинаковым ключом объединятся в одну.')}
+    else add('ok',`«${m.title}»: ключ ${keySrcCol(t)} уникален`,'');
+    if(k.empty)add('warn',`«${m.title}»: у ${k.empty} ${plural(k.empty,'строки','строк','строк')} пустой ключ`,'Эти строки будут пропущены.')});
+  const link=(t,col,target,rel)=>{const m=M[t];if(!on(target)||!hasField(t,col))return;const r=refCheck(t,col,target);if(!r.total)return;const req=relLocked(rel);
+    const lbl=`${rel}: ${m.source}.${keySrcColOf(t,col)} → ${M[target].source}.${keySrcCol(target)}`;
+    if(!r.ok)add(req?'err':'warn',`Связь ${lbl} — ни одно значение не найдено`,'Значения не совпадают с ключами связанной таблицы. Вероятно, неверно выбраны таблица-источник или главный ключ.');
+    else if(r.ok<r.total)add('warn',`Связь ${lbl} — найдено ${r.ok} из ${r.total}`,`${r.total-r.ok} ${plural(r.total-r.ok,'ссылка указывает','ссылки указывают','ссылок указывают')} на несуществующие записи, эти рёбра не появятся.`);
+    else add('ok',`Связь ${lbl} — все ${r.total} ${plural(r.total,'ссылка найдена','ссылки найдены','ссылок найдены')}`,'')};
+  ORDER.forEach(t=>{const m=M[t];if(!on(t))return;if(m.role==='vertex')(m.fks||[]).forEach(f=>link(t,f.col,f.table,f.rel));else{link(t,m.from.col,m.from.table,m.rel);link(t,m.to.col,m.to.table,m.rel)}});
+  ORDER.forEach(t=>{const m=M[t];if(!on(t))return;const rows=objRows(t);if(!rows.length)return;
+    [...new Set([...reqCols(t),...(m.props||[])])].forEach(f=>{if(!hasField(t,f))return;let bad=0;
+      if(DATECOLS.includes(f))bad=rows.filter(r=>r[f]!==''&&r[f]!=null&&!/^\d{4}-\d{2}-\d{2}/.test(String(r[f]))).length;
+      else if(NUMCOLS.includes(f))bad=rows.filter(r=>(r.__bad&&r.__bad[f]!=null)||(r[f]!==''&&r[f]!=null&&typeof r[f]!=='number')).length;
+      if(f==='similarity')bad+=rows.filter(r=>typeof r.similarity==='number'&&(r.similarity<0||r.similarity>1)).length;
+      if(bad)add('warn',`«${m.title}»: в поле ${f} ${bad} ${plural(bad,'значение','значения','значений')} неверного формата`,DATECOLS.includes(f)?'Ожидается дата в виде ГГГГ-ММ-ДД или ДД.ММ.ГГГГ.':f==='similarity'?'Ожидается число от 0 до 1 или процент от 0 до 100.':'Ожидается число.')})});
+  const bySrc={};ORDER.forEach(t=>{const m=M[t];if(on(t))(bySrc[m.source]=bySrc[m.source]||[]).push(m.title)});
+  Object.entries(bySrc).forEach(([src,ts])=>{if(ts.length>1)add('warn',`Таблица ${src} используется для нескольких объектов`,ts.join(', '))});
+  return C}
+function mapErrors(){const C=structureCheck();const f=l=>C.filter(c=>c.level===l).map(c=>c.title+(c.detail?'. '+c.detail:''));return {E:f('err'),W:f('warn'),C}}
+function structHTML(C){const E=C.filter(c=>c.level==='err'),W=C.filter(c=>c.level==='warn'),O=C.filter(c=>c.level==='ok');
+  const ico={err:'<span class="sc-i err" aria-label="ошибка">✕</span>',warn:'<span class="sc-i warn" aria-label="предупреждение">!</span>',ok:'<span class="sc-i ok" aria-label="в порядке">✓</span>'};
+  const li=c=>`<li>${ico[c.level]}<div><b>${esc(c.title)}</b>${c.detail?`<span>${esc(c.detail)}</span>`:''}</div></li>`;
+  return `<div class="sc ${E.length?'bad':W.length?'warn':'ok'}" role="${E.length?'alert':'status'}"><div class="sc-h"><b>Проверка структуры</b><span>${E.length?`${E.length} ${plural(E.length,'ошибка','ошибки','ошибок')} — граф построить нельзя, исправьте их`:W.length?`ошибок нет, ${W.length} ${plural(W.length,'предупреждение','предупреждения','предупреждений')} — граф можно построить`:'структура в порядке — граф можно строить'}</span></div>
+    ${E.length||W.length?`<ul class="sc-l">${[...E,...W].map(li).join('')}</ul>`:''}
+    ${O.length?`<details class="sc-ok"><summary>Пройденные проверки: ${O.length}</summary><ul class="sc-l">${O.map(li).join('')}</ul></details>`:''}</div>`}
+
+/* ---------- Data requirements: what the platform's tables must contain ---------- */
+function fkInfo(t){const s=SCHEMA[t];if(s.role==='edge')return [`${s.from.col} → ${s.from.table}.${SCHEMA[s.from.table].key}`,`${s.to.col} → ${s.to.table}.${SCHEMA[s.to.table].key}`];return (s.fks||[]).map(f=>`${f.col} → ${f.table}.${SCHEMA[f.table].key}`)}
+function reqTableHTML(){return `<div class="tbl-wrap"><table class="req-tbl"><thead><tr><th>Объект</th><th>Таблица</th><th>Также распознаётся</th><th>Главный ключ</th><th>Обязательные поля</th><th>Ссылки на другие таблицы</th></tr></thead><tbody>${ORDER.map(t=>{const s=SCHEMA[t];const req=LOCK.tables.includes(t);
+  return `<tr><td><b>${esc(s.title)}</b><div style="margin-top:3px">${req?`<span class="tag req">${LOCKSVG}обязательная</span>`:'<span class="tag">необязательная</span>'}</div></td><td class="mono">${t}</td><td class="mono" style="font-size:12px;color:var(--muted)">${esc((TABLE_SYN[t]||[]).join(', '))}</td>
+    <td class="mono">${s.key}<div class="muted" style="font-size:11.5px;font-family:var(--f-body)">или ${esc(['id',...(COL_SYN[s.key]||[])].join(', '))}</div></td>
+    <td style="font-size:12.5px">${reqCols(t).filter(c=>c!==s.key).map(c=>`<span class="mono" title="${esc('Также: '+(COL_SYN[c]||[]).join(', '))}">${c}</span>`).join(', ')}</td><td class="mono" style="font-size:12px">${fkInfo(t).join('<br>')}</td></tr>`}).join('')}</tbody></table></div>`}
+function reqMarkdown(){const L=['# Требования к структуре данных — Граф прав','','Таблицы платформы не обязательно называть так же: модуль распознаёт их по названию и столбцам, включая перечисленные синонимы. Неочевидные случаи сопоставляются вручную на шаге «Данные». Перед построением графа модуль проверяет структуру: обязательные поля, уникальность ключей и совпадение ссылок между таблицами.','',
+  '| Объект | Таблица | Обязательная | Также распознаётся | Главный ключ | Обязательные поля | Ссылки |','|---|---|---|---|---|---|---|'];
+  ORDER.forEach(t=>{const s=SCHEMA[t];L.push(`| ${s.title} | ${t} | ${LOCK.tables.includes(t)?'да':'нет'} | ${(TABLE_SYN[t]||[]).join(', ')} | ${s.key} | ${reqCols(t).filter(c=>c!==s.key).join(', ')} | ${fkInfo(t).join('; ')} |`)});
+  L.push('','## Другие названия столбцов','','| Поле | Также распознаётся |','|---|---|');Object.entries(COL_SYN).forEach(([k,v])=>L.push(`| ${k} | ${v.join(', ')} |`));
+  L.push('','## Форматы','','- Даты: ГГГГ-ММ-ДД или ДД.ММ.ГГГГ.','- Числа: через точку или запятую. Сходство (similarity): от 0 до 1 или процент от 0 до 100.','- Логические значения (monetized): true/false, 1/0 или да/нет.','- Ключи должны быть уникальными, а значения ссылок — совпадать с ключами связанных таблиц.');
+  return L.join('\n')}
+
 function nodeLabel(m,r){const v=r[m.labelCol];return (m.prefix||'')+((v==null||v==='')?r[m.key]:v)}
 function edgeLabelOf(m,r){let s=m.caption||m.rel;const vc=m.valueCol;if(vc&&r[vc]!=null&&r[vc]!==''){const v=r[vc];s+=' '+((vc==='similarity'||vc==='confidence')&&typeof v==='number'?Math.round(v*100)+'%':v)}return s}
 const relRu=e=>REL[e.rel]||e.label||e.rel;
@@ -1098,7 +1203,7 @@ Object.defineProperty(state,'include',{get(){const o={};ORDER.forEach(t=>o[t]=!!
 function normalize(tables){
   for(const t of Object.keys(tables)){
     tables[t]=tables[t].map(r=>{const o={...r};
-      for(const c of NUMCOLS) if(c in o && o[c]!==''&&o[c]!=null){let n=Number(String(o[c]).replace(',','.').replace(/\s/g,''));if(isNaN(n))n=0;o[c]=n}
+      for(const c of NUMCOLS) if(c in o && o[c]!==''&&o[c]!=null){let n=Number(String(o[c]).replace(',','.').replace(/\s/g,''));if(isNaN(n)){if(!o.__bad)Object.defineProperty(o,'__bad',{value:{},enumerable:false});o.__bad[c]=o[c];n=0}o[c]=n}
       for(const c of BOOLCOLS) if(c in o){o[c]=o[c]===true||/^(true|1|t|yes|да|y)$/i.test(String(o[c]).trim())}
       if('similarity' in o && o.similarity>1)o.similarity=o.similarity/100;
       for(const c of DATECOLS) if(typeof o[c]==='string'){const v=o[c].trim();const m=v.match(/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})/);if(m)o[c]=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;else if(/^\d{4}-\d{2}-\d{2}/.test(v))o[c]=v.slice(0,10)}
@@ -1237,6 +1342,15 @@ const DECRU={violation:'Нарушение',ok:'Не нарушение',lawyer:
 function chipFor(node,txt){return `<span class="chip" title="${esc(TYPES[node.type].ru+': '+node.label)}"><span class="sw" style="background:${typeColor(node.type)}"></span>${esc(txt||short(node.label,34))}</span>`}
 function short(s,n){s=String(s||'');return s.length>n?s.slice(0,n-1)+'…':s}
 
+/* ---------- Header menu scroller ---------- */
+function navArrows(){const n=$('#nav'),w=$('#navWrap');if(!n)return;const max=n.scrollWidth-n.clientWidth;const L=n.scrollLeft>2,R=n.scrollLeft<max-2;
+  $('#navLeft').hidden=!L;$('#navRight').hidden=!R;w.classList.toggle('fl',L);w.classList.toggle('fr',R)}
+$('#nav').addEventListener('scroll',navArrows,{passive:true});window.addEventListener('resize',navArrows);
+$('#navLeft').onclick=()=>$('#nav').scrollBy({left:-Math.max(160,$('#nav').clientWidth*.6),behavior:'smooth'});
+$('#navRight').onclick=()=>$('#nav').scrollBy({left:Math.max(160,$('#nav').clientWidth*.6),behavior:'smooth'});
+$('#nav').addEventListener('wheel',e=>{const n=e.currentTarget;if(n.scrollWidth<=n.clientWidth||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;e.preventDefault();n.scrollLeft+=e.deltaY},{passive:false});
+try{document.fonts.ready.then(navArrows)}catch(e){}setTimeout(navArrows,0);
+
 /* ---------- Router ---------- */
 const VIEWS=['home','load','chains','case','overview','analysts','report'];
 function go(v){if(location.hash==='#'+v)show(v);else location.hash=v}
@@ -1252,6 +1366,7 @@ function show(v){if(!VIEWS.includes(v))v='home';
   $$('[data-back] span').forEach(sp=>sp.textContent='Назад: '+VIEWRU[backTarget()]);
   VIEWS.forEach(x=>$('#view-'+x).hidden=x!==v);
   $$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.go===v));
+  const ab=$(`#nav button[data-go="${v}"]`);if(ab){const n=$('#nav');const l=ab.offsetLeft,r=l+ab.offsetWidth;if(l<n.scrollLeft+30||r>n.scrollLeft+n.clientWidth-30)n.scrollTo({left:Math.max(0,l-n.clientWidth/2+ab.offsetWidth/2),behavior:reduceMotion()?'auto':'smooth'})}setTimeout(navArrows,350);
   window.scrollTo(0,0);
   if(v==='chains')renderChains();
   if(v==='case'){if(!state.current&&state.chains.length)state.current=state.chains[0].id;renderCase()}
@@ -1302,7 +1417,7 @@ function colDoc(t,c){const s=SCHEMA[t];if(c===s.key)return 'уникальный
   if(t==='users'&&c==='status')return 'active или blocked';if(t==='complaints'&&c==='status')return 'new, in_review, accepted или rejected';
   if(t==='complaints'&&c==='work_id')return 'ID из works.csv';
   return COLDOC[c]||''}
-const HEADER_ALIASES={uploader:'uploader_id',owner_id:'rightholder_id',rightholder:'rightholder_id',licensee:'licensee_id',licensor:'licensor_id',video:'video_id',work:'work_id',user:'user_id',published:'published_at',duration:'duration_sec'};
+const HEADER_ALIASES={};
 function normHeader(h){h=String(h||'').replace(/^﻿/,'').trim().replace(/^"|"$/g,'').toLowerCase().replace(/[\s\-]+/g,'_');return HEADER_ALIASES[h]||h}
 function decodeBuffer(buf){
   try{return {text:new TextDecoder('utf-8',{fatal:true}).decode(buf),enc:'UTF-8'}}
@@ -1344,10 +1459,6 @@ drop.addEventListener('drop',e=>handleFiles(e.dataTransfer.files));
 $('#csvInput').addEventListener('change',e=>{handleFiles(e.target.files);e.target.value=''});
 // Required columns: the key plus every field the chain search reads. A file without them cannot be loaded.
 const reqCols=t=>[...new Set([SCHEMA[t].key,...(LOCK.props[t]||[])])];
-function guessTable(header,stem){let best=null,score=-99;
-  for(const t of ORDER){const s=SCHEMA[t];let sc=s.cols.filter(c=>header.includes(c)).length;if(stem===t)sc+=3;if(!header.includes(s.key)&&!(stem===t&&header.includes('id')))sc-=2;if(sc>score){score=sc;best=t}}
-  return score>=3?best:null}
-function autoColmap(t,header){const m={};SCHEMA[t].cols.forEach(c=>{m[c]=header.includes(c)?c:(c===SCHEMA[t].key&&header.includes('id')?'id':'')});return m}
 async function handleFiles(list){
   const files=Array.from(list||[]).filter(f=>/\.(csv|txt|tsv)$/i.test(f.name)||/csv|text/.test(f.type));
   if(!files.length){toast('Выберите файлы с расширением .csv');return}
@@ -1377,7 +1488,7 @@ function renderCsv(){
   const opt=(f,i)=>`<select class="input" data-cf="${i}" data-ck="table" aria-label="Таблица для файла ${esc(f.name)}"><option value="">— не загружать —</option>${ORDER.map(t=>`<option value="${t}" ${t===f.table?'selected':''}>${esc(SCHEMA[t].title)} (${t})</option>`).join('')}</select>`;
   const rows=F.map((f,i)=>{if(f.err)return `<tr><td class="mono">${esc(f.name)}</td><td colspan="4"><span class="tag hi">ошибка</span> ${esc(f.err)}</td></tr>`;
     const pc=P.cols.find(x=>x.i===i);const dup=P.dup.find(d=>d.t===f.table);
-    const status=!f.table?'<span class="muted">не загружается</span>':pc?`<span class="err-t">Нет обязательных полей: <span class="mono">${esc(pc.miss.join(', '))}</span></span>`:dup?`<span class="err-t">В эту таблицу назначено несколько файлов</span>`:'<span style="color:var(--lo)">все обязательные поля на месте</span>';
+    const status=!f.table?'<span class="muted">не загружается</span>':pc?`<span class="err-t">Нет обязательных полей: <span class="mono">${esc(pc.miss.join(', '))}</span></span>`:dup?`<span class="err-t">В эту таблицу назначено несколько файлов</span>`:`<span style="color:var(--lo)">все обязательные поля на месте</span>${synCount(f)?`<div class="muted" style="font-size:12px">${synCount(f)} ${plural(synCount(f),'столбец сопоставлен','столбца сопоставлены','столбцов сопоставлены')} по другим названиям — проверьте в «Столбцы»</div>`:''}`;
     const how=f.table?(f.table===f.auto?'<span class="muted" style="font-size:12px">определено по заголовкам</span>':'<span style="font-size:12px;color:var(--accent)">выбрано вручную</span>'):(f.auto?'':'<span class="muted" style="font-size:12px">не удалось определить</span>');
     let h=`<tr class="${pc||dup?'row-err':''}"><td class="mono">${esc(f.name)}<div class="muted" style="font-size:12px;font-family:var(--f-body)">${esc(f.enc)}, ${esc(DELIMRU[f.delim]||f.delim)}</div></td><td style="min-width:230px">${opt(f,i)}<div>${how}</div></td><td class="num">${fmtNum(f.rows.length)}</td><td style="font-size:13px">${status}</td><td>${f.table?`<button class="btn sm ${f.open?'primary':''}" data-cf-open="${i}">${f.open?'Скрыть столбцы':'Столбцы'}</button>`:''}</td></tr>`;
     if(f.open&&f.table){const req=new Set(reqCols(f.table));
@@ -1488,9 +1599,8 @@ function renderMapping(){
   $('#mapCards').hidden=state.mapView!=='cards';$('#mapTable').hidden=state.mapView!=='table';$('.map-grid').classList.toggle('tbl-mode',state.mapView==='table');
   $('#mapTable').innerHTML=state.mapView==='table'?mapTableHTML():'';if(state.mapView==='table'){$('#mapVertices').innerHTML='';$('#mapEdges').innerHTML=''}
   const ME=mapErrors();
-  $('#mapErrors').hidden=!ME.E.length&&!ME.W.length;
-  $('#mapErrors').innerHTML=(ME.E.length?`<div class="err-box" role="alert"><b>Схема содержит ошибки — граф построить нельзя</b><ul>${ME.E.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'')+(ME.W.length?`<div class="err-box soft"><b>Проверьте</b><ul>${ME.W.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'');
-  const bb=$('#buildBtn');bb.disabled=ME.E.length>0;bb.title=ME.E.length?'Исправьте ошибки схемы преобразования':'';
+  $('#mapErrors').hidden=false;$('#mapErrors').innerHTML=structHTML(ME.C);
+  const bb=$('#buildBtn');bb.disabled=ME.E.length>0;bb.title=ME.E.length?'Исправьте ошибки в проверке структуры':'';$('#buildHint').innerHTML=ME.E.length?`<span class="err-t">Проверка структуры: ${ME.E.length} ${plural(ME.E.length,'ошибка','ошибки','ошибок')}</span>`:ME.W.length?`<span style="color:var(--mid)">Проверка структуры: ${ME.W.length} ${plural(ME.W.length,'предупреждение','предупреждения','предупреждений')}</span>`:'<span style="color:var(--lo)">Проверка структуры пройдена</span>';
   const s=mapSummary();$('#mapCounts').textContent=`${s.v} типов вершин · ${s.e} типов связей`;
   const warn=[];if(!M.licenses.on)warn.push('без таблицы лицензий все совпадения будут считаться нелицензированными');
   if(!M.complaints.on)warn.push('без жалоб не сработают запросы по жалобам, а блокировки потеряют связь с основанием');
@@ -1502,17 +1612,26 @@ function renderMapping(){
 }
 function sourceSelect(t,attr){const m=state.map[t];const req=LOCK.tables.includes(t);
   return `<select class="input" ${attr} aria-label="Таблица-источник для объекта ${esc(m.title)}">${req?'':`<option value="" ${!m.source?'selected':''}>— не выбрана (объект не создаётся) —</option>`}${ORDER.map(x=>`<option value="${x}" ${x===m.source?'selected':''}>${esc(SCHEMA[x].title)} (${x}) · ${fmtNum((state.tables[x]||[]).length)} стр.</option>`).join('')}</select>`}
+const keySrcCol=t=>{const m=state.map[t];return m.colmap?m.colmap[m.key]||'':m.key};
+function keyStats(t){const m=state.map[t];const seen=new Map();let empty=0;objRows(t).forEach(r=>{const k=r[m.key];if(k==null||k===''){empty++;return}seen.set(String(k),(seen.get(String(k))||0)+1)});
+  let dup=0;seen.forEach(v=>{if(v>1)dup+=v-1});return {dup,empty,uniq:seen.size}}
+function keyBadge(t){if(!keySrcCol(t))return '<span class="tag hi">ключ не выбран</span>';const k=keyStats(t);
+  return k.dup||k.empty?`<span class="tag mid" title="Строки с повторяющимся или пустым ключом объединяются или пропускаются">${k.dup?'повторов: '+k.dup:''}${k.dup&&k.empty?', ':''}${k.empty?'пустых: '+k.empty:''}</span>`:`<span class="tag lo">${k.uniq} уникальных значений</span>`}
+function keyPickHTML(t,compact){const m=state.map[t];const cur=keySrcCol(t);
+  const sel=`<select class="input" data-fkey="1" aria-label="Главный ключ объекта ${esc(m.title)}">${cur?'':'<option value="" selected>— выберите —</option>'}${rawCols(m.source).map(c=>`<option value="${esc(c)}" ${c===cur?'selected':''}>${esc(c)}</option>`).join('')}</select>`;
+  if(compact)return `${sel}<div style="margin-top:4px">${keyBadge(t)}</div>`;
+  return `<label class="field"><span>Главный ключ <b class="req-star" title="Обязательно выбрать">*</b></span>${sel}<span class="field-hint">Таблица-источник изменена, поэтому ключ берётся из её столбцов. Значения ключа должны быть уникальными. ${keyBadge(t)}</span></label>`}
 function fieldMapHTML(t){const m=state.map[t];if(!m.source)return '';const req=new Set(reqCols(t));const miss=reqCols(t).filter(f=>!hasField(t,f));
   if(m.source===t&&!m.colmap&&!miss.length)return '';
   const cur=f=>m.colmap?m.colmap[f]:(rawCols(m.source).includes(f)?f:'');
-  return `<div class="ed-sec"><h4>Поля объекта ← столбцы таблицы ${esc(m.source)}</h4><p class="muted" style="font-size:12px;margin:0">Поля со звёздочкой обязательны: без них объект не будет создан.</p><div class="cm-grid">${SCHEMA[t].cols.map(f=>{const ms=req.has(f)&&!cur(f);
+  return `<div class="ed-sec"><h4>Поля объекта ← столбцы таблицы ${esc(m.source)}</h4><p class="muted" style="font-size:12px;margin:0">Поля со звёздочкой обязательны: без них объект не будет создан.${m.source!==t?' Главный ключ выбирается выше.':''}</p><div class="cm-grid">${SCHEMA[t].cols.filter(f=>m.source===t||f!==m.key).map(f=>{const ms=req.has(f)&&!cur(f);
     return `<label class="cm ${ms?'miss':''}"><span class="mono">${esc(f)}${req.has(f)?'<b class="req-star" title="Обязательное поле">*</b>':''}</span><select class="input" data-fmap="${esc(f)}"><option value="">— нет —</option>${rawCols(m.source).map(c=>`<option value="${esc(c)}" ${c===cur(f)?'selected':''}>${esc(c)}</option>`).join('')}</select>${ms?'<span class="err-t" style="font-size:12px">обязательное поле не выбрано</span>':''}</label>`}).join('')}</div></div>`}
 function mapTableHTML(){const M=state.map;
   return `<div class="tbl-wrap"><table class="map-tbl"><thead><tr><th>Объект графа</th><th>Роль</th><th>Таблица-источник</th><th>Ключ</th><th>Подпись / связь</th><th>Связи</th><th>Строк</th><th>Проверка</th><th></th></tr></thead><tbody>${ORDER.map(t=>{const m=M[t];const isV=m.role==='vertex';const req=LOCK.tables.includes(t);
     const miss=m.source&&m.on?reqCols(t).filter(f=>!hasField(t,f)):[];const n=objRows(t).length;
     const st=req&&!m.source?'<span class="err-t">выберите таблицу</span>':!m.on||!m.source?'<span class="muted">не создаётся</span>':miss.length?`<span class="err-t">нет полей: ${esc(miss.join(', '))}</span>`:isV&&labelTaken(t,m.neo)?'<span class="err-t">название занято</span>':'<span style="color:var(--lo)">в порядке</span>';
     return `<tr class="${miss.length||(req&&!m.source)?'row-err':''} ${!m.on||!m.source?'row-off':''}" data-ed="${t}"><td><div class="row" style="gap:8px;flex-wrap:nowrap"><span class="ico-s" style="background:${isV?typeColor(m.type):'var(--fg-soft)'}">${isV?TYPES[m.type].abbr:'→'}</span><div><b>${isV?esc(TYPES[m.type].ru):esc(m.title)}</b>${req?` <span class="lock" title="Обязательный объект">${LOCKSVG}</span>`:''}<div class="mono muted" style="font-size:12px">${isV?':'+esc(m.neo):':'+esc(m.rel)}</div></div></div></td>
-      <td>${isV?'вершины':'связи'}</td><td style="min-width:230px">${sourceSelect(t,`data-src-sel="${t}"`)}</td><td class="mono" style="font-size:12.5px">${esc(m.key)}</td>
+      <td>${isV?'вершины':'связи'}</td><td style="min-width:230px">${sourceSelect(t,`data-src-sel="${t}"`)}</td><td class="mono" style="font-size:12.5px;min-width:150px">${m.source&&m.source!==t?keyPickHTML(t,true):esc(m.key)}</td>
       <td style="font-size:12.5px">${isV?`${esc(m.prefix||'')}<span class="mono">${esc(m.labelCol)}</span>`:`«${esc(m.caption)}» · ${esc(m.from.table)} → ${esc(m.to.table)}`}</td>
       <td style="font-size:12.5px">${isV?(m.fks||[]).map(f=>`<span class="mono">${esc(f.rel)}</span>`).join(', ')||'—':`<span class="mono">${esc(m.rel)}</span>`}</td>
       <td class="num">${m.source?fmtNum(n):'—'}</td><td style="font-size:12.5px">${st}</td><td><button class="btn sm ${state.mapOpen===t?'primary':''}" data-ed-goto="${t}" aria-expanded="${state.mapOpen===t}">${state.mapOpen===t?'Свернуть ▴':'Настроить ▾'}</button></td></tr>${state.mapOpen===t?`<tr class="ed-row"><td colspan="9">${editorHTML(t)}</td></tr>`:miss.length&&fieldMapHTML(t)?`<tr class="cm-row" data-ed="${t}"><td colspan="9">${fieldMapHTML(t)}</td></tr>`:''}`}).join('')}</tbody></table></div>
@@ -1520,8 +1639,9 @@ function mapTableHTML(){const M=state.map;
 function setSource(t,src){const m=state.map[t];const req=LOCK.tables.includes(t);
   if(!src){if(req){toast(`«${m.title}» — обязательный объект: таблицу-источник нужно выбрать`,3200);renderMapping();return}m.source='';m.on=false;m.colmap=null;mapChanged(`Объект «${m.title}» не создаётся: таблица не выбрана`);return}
   m.source=src;m.on=true;m.colmap=src===t?null:autoColmap(t,rawCols(src));
+  if(m.colmap&&!m.colmap[m.key]){const rc=rawCols(src);const guess=[SCHEMA[src]&&SCHEMA[src].key,'id'].find(c=>c&&rc.includes(c));if(guess)m.colmap[m.key]=guess}
   const miss=reqCols(t).filter(f=>!hasField(t,f));if(miss.length)state.mapOpen=t;
-  mapChanged(`«${m.title}» берёт данные из таблицы ${src}`+(miss.length?`. Сопоставьте обязательные поля: ${miss.join(', ')}`:''))}
+  mapChanged(`«${m.title}» берёт данные из таблицы ${src}`+(m.colmap&&m.colmap[m.key]?`, главный ключ: ${m.colmap[m.key]}`:'')+(miss.length?`. Сопоставьте обязательные поля: ${miss.join(', ')}`:''))}
 function colSelect(t,attr,val,opts){const cols=opts||colsOf(t);return `<select class="input" ${attr}>${cols.map(c=>`<option value="${esc(c)}" ${c===val?'selected':''}>${esc(c)}</option>`).join('')}</select>`}
 function tableSelect(attr,val,dis){return `<select class="input" ${attr} ${dis?'disabled':''}>${ORDER.filter(t=>state.map[t].role==='vertex').map(t=>`<option value="${t}" ${t===val?'selected':''}>${esc(state.map[t].title)} (${t})</option>`).join('')}</select>`}
 function checkBadge(t,col,target){const r=refCheck(t,col,target);if(!r.total)return '<span class="ck muted">нет значений</span>';
@@ -1535,7 +1655,7 @@ function editorHTML(t){const m=state.map[t];const isV=m.role==='vertex';
   if(isV){const keyLocked=LOCK.keyFixed.includes(t);
     const dupl=labelTaken(t,m.neo);
     h+=`<label class="field"><span>Название вершины в графовой СУБД</span><input class="input mono ${dupl?'bad':''}" data-f="neo" value="${esc(m.neo)}" spellcheck="false">${dupl?`<span class="err-t" style="font-size:12px">Такое же название у «${esc(state.map[dupl].title)}»</span>`:'<span class="field-hint">Должно отличаться от названий других вершин</span>'}</label>
-      ${keyLocked?`<div class="field"><span>Ключевой столбец</span><span class="static mono" title="Обязательная настройка: на этот ключ ссылаются другие таблицы">${esc(m.key)} ${LOCKSVG}</span></div>`:`<label class="field"><span>Ключевой столбец</span>${colSelect(t,'data-f="key"',m.key)}</label>`}
+      ${m.source&&m.source!==t?keyPickHTML(t):keyLocked?`<div class="field"><span>Ключевой столбец</span><span class="static mono" title="Обязательная настройка: на этот ключ ссылаются другие таблицы">${esc(m.key)} ${LOCKSVG}</span></div>`:`<label class="field"><span>Ключевой столбец</span>${colSelect(t,'data-f="key"',m.key)}</label>`}
       <div class="field"><span>Подпись вершины</span><div class="row" style="gap:6px;flex-wrap:nowrap"><input class="input" data-f="prefix" value="${esc(m.prefix)}" placeholder="Префикс" style="width:150px">${colSelect(t,'data-f="labelCol"',m.labelCol)}</div><span class="field-hint">Пример: ${esc(nodeLabel(m,objRows(t)[0]||{}))}</span></div></div>
       <div class="ed-sec"><h4>Связи из внешних ключей</h4><div class="fk-list">`;
     h+=(m.fks||[]).map((f,i)=>{const lk=relLocked(f.rel);const tgt=state.map[f.table];const dirTxt=f.dir==='in'?`${esc(tgt?tgt.title:f.table)} → ${esc(m.title)}`:`${esc(m.title)} → ${esc(tgt?tgt.title:f.table)}`;
@@ -1550,7 +1670,7 @@ function editorHTML(t){const m=state.map[t];const isV=m.role==='vertex';
         <label class="field"><span>Подпись на ребре</span><input class="input" data-new="caption" placeholder="например, касается"></label>
         <label class="field"><span>Код связи</span><input class="input mono" data-new="rel" placeholder="REFERS_TO" spellcheck="false"></label>
         <div class="field"><span>&nbsp;</span><button type="button" class="btn primary sm" data-fk-add>Добавить</button></div></div></div>`:''}</div>`;
-  }else{const lk=relLocked(m.rel);
+  }else{const lk=relLocked(m.rel);if(m.source&&m.source!==t)h+=keyPickHTML(t);
     const why=esc('Обязательная настройка: '+(LOCKWHY[m.rel]||''));
     h+=lk?`<div class="field"><span>Откуда</span><span class="static mono" title="${why}">${esc(t)}.${esc(m.from.col)} → ${esc(m.from.table)} ${LOCKSVG}</span></div>
       <div class="field"><span>Куда</span><span class="static mono" title="${why}">${esc(t)}.${esc(m.to.col)} → ${esc(m.to.table)} ${LOCKSVG}</span></div>
@@ -1592,6 +1712,8 @@ $('#mapping').addEventListener('change',e=>{
     if(inc.checked&&state.map[t].role==='vertex'&&labelTaken(t,state.map[t].neo)){inc.checked=false;toast(`Нельзя включить: название вершины «${state.map[t].neo}» уже занято. Измените его в настройках`,3600);return}
     state.map[t].on=inc.checked;mapChanged(inc.checked?`Таблица ${t} включена`:`Таблица ${t} исключена из графа`);return}
   const ed=e.target.closest('[data-ed]');if(!ed)return;const t=ed.dataset.ed;const m=state.map[t];const el=e.target;
+  if(el.dataset.fkey){if(!m.colmap){m.colmap={};SCHEMA[t].cols.forEach(x=>{m.colmap[x]=rawCols(m.source).includes(x)?x:''})}m.colmap[m.key]=el.value;
+    const k=keyStats(t);mapChanged(`Главный ключ «${m.title}»: ${el.value}`+(k.dup?` — значения повторяются (${k.dup}), такие строки объединятся`:''));return}
   if(el.dataset.fmap){const f=el.dataset.fmap;if(!m.colmap){m.colmap={};SCHEMA[t].cols.forEach(x=>{m.colmap[x]=rawCols(m.source).includes(x)?x:''})}m.colmap[f]=el.value;
     if(!el.value&&reqCols(t).includes(f))toast(`Поле ${f} обязательно: без него объект «${m.title}» не будет создан`,3200);mapChanged();return}
   if(el.dataset.prop){const c=el.dataset.prop;if(el.checked){if(!m.props.includes(c))m.props.push(c)}else m.props=m.props.filter(x=>x!==c);mapChanged();return}
@@ -1610,6 +1732,7 @@ $('#mapping').addEventListener('change',e=>{
   if(f==='rel'){const r=val.toUpperCase().replace(/[^A-Z0-9_]/g,'_');if(!/^[A-Z][A-Z0-9_]*$/.test(r)||relLocked(r)){toast('Недопустимый или занятый код связи');el.value=m.rel;return}m.rel=r}
   mapChanged('Связка изменена');
 });
+$('#buildHint').onclick=()=>$('#mapErrors').scrollIntoView({behavior:'smooth',block:'center'});
 $('#mapReset').onclick=()=>{state.map=defaultMap();state.mapOpen=null;mapChanged('Связки возвращены к исходным')};
 $('#mapView').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){state.mapView=b.dataset.v;renderMapping()}});
 function cypherScript(){
@@ -1636,7 +1759,7 @@ function renderMetaGraph(){
   ORDER.filter(t=>M[t].on&&M[t].source&&M[t].role==='edge'&&isV(M[t].from.table)&&isV(M[t].to.table)).forEach(t=>{const m=M[t];const id='et:'+m.rel;if(seen.has(id))return;seen.add(id);
     els.push({data:{id,source:M[m.from.table].type,target:M[m.to.table].type,label:m.caption},classes:m.rel==='CONTAINS'?'risk':''})});
   if(metaCy)metaCy.destroy();
-  metaCy=cytoscape({container:$('#metaCy'),elements:els,style:cyStyle('meta'),layout:{name:'circle',padding:30},wheelSensitivity:.25});
+  metaCy=cytoscape({container:$('#metaCy'),elements:els,style:cyStyle('meta'),layout:{name:'circle',padding:30}});
   setTimeout(metaRelayout,60);
 }
 function metaRelayout(){if(!metaCy)return;metaCy.resize();metaCy.layout({name:'circle',padding:30,radius:150,startAngle:-Math.PI/2}).run();
@@ -1646,7 +1769,7 @@ function metaRelayout(){if(!metaCy)return;metaCy.resize();metaCy.layout({name:'c
 /* ---------- Build ---------- */
 $('#buildBtn').onclick=async()=>{
   if(!state.tables)return;
-  const ME=mapErrors();if(ME.E.length){renderMapping();toast('Схема содержит ошибки: '+ME.E[0],4200);$('#mapErrors').scrollIntoView({behavior:'smooth',block:'center'});return}
+  const ME=mapErrors();if(ME.E.length){renderMapping();toast('Проверка структуры не пройдена: '+ME.E[0],4600);$('#mapErrors').scrollIntoView({behavior:'smooth',block:'center'});return}
   const btn=$('#buildBtn');btn.disabled=true;
   const panel=$('#buildPanel');panel.hidden=false;$('#buildResult').hidden=true;
   const T=state.tables,inc=state.include;
@@ -2099,7 +2222,7 @@ function drawGraph(c){
   const els=[...vis].map(id=>{const p=pos.get(id);return {group:'nodes',data:nodeData(g.nodes.get(id)),classes:coreSet.has(id)?'core':'chain',position:{x:p.x,y:p.y}}});
   edges.forEach(e=>els.push({group:'edges',data:{id:e.id,source:e.source,target:e.target,label:e.label,orig:e.id},classes:'core'+(e.rel==='CONTAINS'?' risk':'')}));
   if(cy)cy.destroy();
-  cy=cytoscape({container:$('#cy'),elements:els,style:cyStyle('case'),layout:{name:'preset'},wheelSensitivity:.25,minZoom:.2,maxZoom:2.5});
+  cy=cytoscape({container:$('#cy'),elements:els,style:cyStyle('case'),layout:{name:'preset'},minZoom:.2,maxZoom:2.5});
   cy.scratch('_lsMax',2.2);
   bindGraphEvents(cy,caseCard,caseSelect,clearCaseSel);
   cy.on('dbltap','node',ev=>{const n=expand(ev.target.id());toast(n?`Добавлено соседей: ${n}`:'Все соседи этого объекта уже на графе',2200)});
@@ -2331,7 +2454,7 @@ function renderOverview(){
     const R=Math.max(320,nodes.length*18);
     const els=nodes.map((n,i)=>{const o=ns.get(n.id);return {group:'nodes',data:nodeData(n,{maxRisk:o.max}),classes:(heat?'heat-'+lvlOf(o.max):'')+(o.changed?' changed':''),position:{x:R*Math.cos(2*Math.PI*i/nodes.length),y:R*Math.sin(2*Math.PI*i/nodes.length)}}});
     [...es].map(edgeById).filter(e=>e&&ns.has(e.source)&&ns.has(e.target)).forEach(e=>els.push({group:'edges',data:{id:e.id,source:e.source,target:e.target,label:e.label,orig:e.id},classes:e.rel==='CONTAINS'?'risk':''}));
-    ocy=cytoscape({container:$('#ocy'),elements:els,style:cyStyle('over'),layout:{name:'preset'},wheelSensitivity:.25,minZoom:.08,maxZoom:2.5});
+    ocy=cytoscape({container:$('#ocy'),elements:els,style:cyStyle('over'),layout:{name:'preset'},minZoom:.08,maxZoom:2.5});
     const lay=ocy.layout({name:'cose',animate:reduceMotion()?false:'end',animationDuration:700,animationEasing:'ease-in-out-cubic',randomize:false,nodeRepulsion:()=>40000,idealEdgeLength:()=>170,gravity:.3,numIter:1200,padding:40,fit:true});
     lay.one('layoutstop',()=>overFinish());lay.run();
   }else{
@@ -2352,7 +2475,7 @@ function renderOverview(){
           els.push({group:'nodes',data:nodeData(n,{id:k.c.id+'|'+id,parent:pid,chain:k.c.id,cx:ox,cyc:oy,copies}),classes:(k.core.has(id)?'core':'chain')+(copies>1?' copy':''),position:{x:ox+p.x,y:oy+p.y}})});
         k.edges.forEach(e=>els.push({group:'edges',data:{id:k.c.id+'|'+e.id,source:k.c.id+'|'+e.source,target:k.c.id+'|'+e.target,label:e.label,orig:e.id,chain:k.c.id},classes:'core'+(e.rel==='CONTAINS'?' risk':'')}))});
       rowY+=rowH}
-    ocy=cytoscape({container:$('#ocy'),elements:els,style:cyStyle('over'),layout:{name:'preset'},wheelSensitivity:.25,minZoom:.06,maxZoom:2.5});
+    ocy=cytoscape({container:$('#ocy'),elements:els,style:cyStyle('over'),layout:{name:'preset'},minZoom:.06,maxZoom:2.5});
     overFinish();
   }
   bindGraphEvents(ocy,overCard,overSelect,()=>ocy&&ocy.elements().removeClass('faded twin'));
@@ -2520,7 +2643,7 @@ $('#repGoCase').onclick=()=>{if(!state.graph)go('load');else{state.current=(stat
 function toCSV(header,rowsArr,sep){const q=v=>{v=v==null?'':String(v);return /["\n\r;,\t]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};return [header,...rowsArr].map(r=>r.map(q).join(sep)).join('\r\n')}
 /* ---------- Export: build the file, preview it, then save through the viewer ---------- */
 let dlPromise=null;
-const browserDownloads={browser:true,save:async({filename,data})=>{const type=/\.pdf$/i.test(filename)?'application/pdf':'text/csv;charset=utf-8';
+const browserDownloads={browser:true,save:async({filename,data})=>{const type=/\.pdf$/i.test(filename)?'application/pdf':/\.md$/i.test(filename)?'text/markdown;charset=utf-8':'text/csv;charset=utf-8';
   const url=URL.createObjectURL(new Blob([data],{type}));const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);return {status:'saved'}}};
 function getDownloads(){
   if(dlPromise)return dlPromise;
@@ -2649,6 +2772,7 @@ $('#resetAll').onclick=()=>{modal(`<h2 style="font-size:18px">Сбросить �
     $('#mapping').hidden=true;$('#buildPanel').hidden=true;$('#buildBtn').textContent='Подтвердить и построить граф';$('#csvResult').hidden=true;$('#pgLog').hidden=true;
     if(cy){cy.destroy();cy=null}if(ocy){ocy.destroy();ocy=null}updateNav();$('#modal').hidden=true;toast('Данные сброшены');go('home')}};
 
+$('#reqBody').innerHTML=reqTableHTML();$('#reqSave').onclick=()=>saveFile('trebovaniya-k-dannym.md',reqMarkdown(),'md');
 caseCard=new CardHost($('#caseGraphBox'),$('#cy'));
 overCard=new CardHost($('#overGraphBox'),$('#ocy'));
 updateNav();
