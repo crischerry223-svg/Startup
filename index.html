@@ -73,11 +73,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .nav-arrow:hover{border-color:var(--edge);background:var(--surface-2)}
 .nav-arrow.left{left:0}.nav-arrow.right{right:0}
 .nav{position:relative}
-.nav button{position:relative;z-index:1;display:flex;align-items:center;gap:8px;white-space:nowrap;background:none;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500;transition:color .2s}
+.nav button{position:relative;z-index:1;display:flex;align-items:center;gap:8px;white-space:nowrap;background:none;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500;transition:color .35s}
 .nav button:hover{color:var(--fg)}
 .nav button.active{color:var(--accent)}
 .nav-follower{position:absolute;top:0;left:0;height:calc(100% - 3px);width:0;border-radius:8px;background:var(--accent-soft);pointer-events:none;z-index:0;opacity:0;
-  transition:transform .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),background-color .2s,opacity .2s}
+  transition:transform .6s cubic-bezier(.22,1,.36,1),width .6s cubic-bezier(.22,1,.36,1),background-color .35s,opacity .3s}
 .nav-follower.on{opacity:1}
 .nav-follower.hover{background:var(--surface-2)}
 @media (prefers-reduced-motion:reduce){.nav-follower{transition:none}}
