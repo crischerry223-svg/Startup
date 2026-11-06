@@ -72,9 +72,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 .nav-arrow svg{width:14px;height:14px}
 .nav-arrow:hover{border-color:var(--edge);background:var(--surface-2)}
 .nav-arrow.left{left:0}.nav-arrow.right{right:0}
-.nav button{display:flex;align-items:center;gap:8px;white-space:nowrap;background:none;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500}
-.nav button:hover{background:var(--surface-2);color:var(--fg)}
-.nav button.active{background:var(--accent-soft);color:var(--accent)}
+.nav{position:relative}
+.nav button{position:relative;z-index:1;display:flex;align-items:center;gap:8px;white-space:nowrap;background:none;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500;transition:color .2s}
+.nav button:hover{color:var(--fg)}
+.nav button.active{color:var(--accent)}
+.nav-follower{position:absolute;top:0;left:0;height:calc(100% - 3px);width:0;border-radius:8px;background:var(--accent-soft);pointer-events:none;z-index:0;opacity:0;
+  transition:transform .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),background-color .2s,opacity .2s}
+.nav-follower.on{opacity:1}
+.nav-follower.hover{background:var(--surface-2)}
+@media (prefers-reduced-motion:reduce){.nav-follower{transition:none}}
 .nav .step{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font-size:11px;font-weight:600}
 .nav button.done .step{background:currentColor}
 .nav button.done .step span{color:var(--surface)}
@@ -1357,6 +1363,29 @@ $('#navRight').onclick=()=>$('#nav').scrollBy({left:Math.max(160,$('#nav').clien
 $('#nav').addEventListener('wheel',e=>{const n=e.currentTarget;if(n.scrollWidth<=n.clientWidth||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;e.preventDefault();n.scrollLeft+=e.deltaY},{passive:false});
 try{document.fonts.ready.then(navArrows)}catch(e){}setTimeout(navArrows,0);
 
+/* ---------- Floating nav follower ---------- */
+const navEl=$('#nav'),follower=document.createElement('span');
+follower.className='nav-follower';follower.setAttribute('aria-hidden','true');navEl.prepend(follower);
+let navHover=null;
+function placeFollower(btn,hover){
+  if(!btn){follower.classList.remove('on');return}
+  const first=!follower.dataset.ready;
+  if(first)follower.style.transition='none';
+  follower.style.width=btn.offsetWidth+'px';
+  follower.style.transform=`translateX(${btn.offsetLeft}px)`;
+  follower.classList.add('on');
+  follower.classList.toggle('hover',!!hover&&!btn.classList.contains('active'));
+  if(first){follower.offsetWidth;follower.style.transition='';follower.dataset.ready='1'}
+}
+function syncFollower(){placeFollower(navHover||navEl.querySelector('button.active'),!!navHover)}
+navEl.addEventListener('pointerover',e=>{const b=e.target.closest('button');if(b&&e.pointerType!=='touch'){navHover=b;syncFollower()}});
+navEl.addEventListener('pointerleave',()=>{navHover=null;syncFollower()});
+navEl.addEventListener('focusin',e=>{const b=e.target.closest('button');if(b&&b.matches(':focus-visible')){navHover=b;syncFollower()}});
+navEl.addEventListener('focusout',()=>{navHover=null;syncFollower()});
+window.addEventListener('resize',syncFollower);
+try{document.fonts.ready.then(syncFollower)}catch(e){}
+
+
 /* ---------- Router ---------- */
 const VIEWS=['home','load','chains','case','overview','analysts','report'];
 function go(v){if(location.hash==='#'+v)show(v);else location.hash=v}
@@ -1371,7 +1400,7 @@ function show(v){if(!VIEWS.includes(v))v='home';
   navBack=false;curView=v;
   $$('[data-back] span').forEach(sp=>sp.textContent='Назад: '+VIEWRU[backTarget()]);
   VIEWS.forEach(x=>$('#view-'+x).hidden=x!==v);
-  $$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.go===v));
+  $$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.go===v));syncFollower();
   const ab=$(`#nav button[data-go="${v}"]`);if(ab){const n=$('#nav');const l=ab.offsetLeft,r=l+ab.offsetWidth;if(l<n.scrollLeft+30||r>n.scrollLeft+n.clientWidth-30)n.scrollTo({left:Math.max(0,l-n.clientWidth/2+ab.offsetWidth/2),behavior:reduceMotion()?'auto':'smooth'})}setTimeout(navArrows,350);
   window.scrollTo(0,0);
   if(v==='chains')renderChains();
